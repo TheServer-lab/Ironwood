@@ -76,6 +76,17 @@ else
   say "small"
 end
 
+; Chain multiple conditions by nesting if inside else
+if x > 10
+  say "large"
+else
+  if x > 5
+    say "medium"
+  else
+    say "small"
+  end
+end
+
 ; Inline ternary
 let label = if x > 5 then "big" else "small"
 ```
@@ -305,6 +316,7 @@ std.io.confirm("Sure?")    ; returns true/false
 | Print | `say "hello"` |
 | Input | `let x = ask "prompt"` |
 | If/else | `if cond ... else ... end` |
+| Nested else-if | `if cond ... else` ↵ `  if cond2 ... end` ↵ `end` |
 | Ternary | `if cond then a else b` |
 | While | `while cond ... end` |
 | For each | `for each x in list ... end` |
