@@ -1,0 +1,29 @@
+; ─────────────────────────────────────────
+;  03_guessing_game.irw — Number guessing
+; ─────────────────────────────────────────
+
+let secret = parseInt(math.random() * 100 + 1)
+let attempts = 0
+
+say "I'm thinking of a number between 1 and 100."
+say "Can you guess it?"
+
+let won = false
+while not won
+  let raw = ask "Your guess: "
+  let guess = parseInt(raw)
+
+  set attempts = attempts + 1
+
+  if guess == secret
+    set won = true
+    let plural = if attempts == 1 then "" else "s"
+    say "Correct! You got it in " + attempts + " attempt" + plural + "."
+  else
+    if guess < secret
+      say "Too low — try higher!"
+    else
+      say "Too high — try lower!"
+    end
+  end
+end
