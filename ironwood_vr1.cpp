@@ -53,6 +53,7 @@
 #  include <sys/wait.h>
 #endif
 #include <cstring>
+#include <ctime>
 
 // ============================================================
 //  TOKENS
@@ -1699,6 +1700,7 @@ int main(int argc,char** argv){
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2,2),&wsaData);
 #endif
+    srand((unsigned)time(nullptr));
     if(argc<2){std::cerr<<"Usage: ironwood <file.irw> [args...]\n";return 1;}
     std::ifstream file(argv[1]);
     if(!file){std::cerr<<"Can't open file: "<<argv[1]<<"\n";return 1;}
