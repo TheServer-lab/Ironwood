@@ -335,4 +335,4 @@ std.io.confirm("Sure?")    ; returns true/false
 
 ## License
 
-MIT
+SLOC
