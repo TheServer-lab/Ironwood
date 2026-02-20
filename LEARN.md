@@ -191,16 +191,20 @@ let score = 75
 
 if score >= 90
   say "A grade"
-else if score >= 70
-  say "B grade"
-else if score >= 50
-  say "C grade"
 else
-  say "Fail"
+  if score >= 70
+    say "B grade"
+  else
+    if score >= 50
+      say "C grade"
+    else
+      say "Fail"
+    end
+  end
 end
 ```
 
-Every `if` block ends with `end`.
+Every `if` block ends with `end`. To chain multiple conditions, nest `if` inside `else` — each one needs its own `end`.
 
 ### Inline ternary (if-then-else expression)
 
@@ -955,10 +959,12 @@ while not won
   if guess == secret
     set won = true
     say "Correct! You got it in " + attempts + " attempts!"
-  else if guess < secret
-    say "Too low!"
   else
-    say "Too high!"
+    if guess < secret
+      say "Too low!"
+    else
+      say "Too high!"
+    end
   end
 end
 ```
@@ -1000,25 +1006,28 @@ while running
     add {text: text, done: false} to todos
     write json of todos to file filename
     say "Added!"
-
-  else if choice == "2"
-    let idx = parseInt(ask "Task number: ") - 1
-    set todos[idx].done = true
-    write json of todos to file filename
-    say "Marked done!"
-
-  else if choice == "3"
-    let idx = parseInt(ask "Task number: ")
-    set todos = keep items in todos where function(t)
-      set idx = idx - 1
-      return idx != 0
+  else
+    if choice == "2"
+      let idx = parseInt(ask "Task number: ") - 1
+      set todos[idx].done = true
+      write json of todos to file filename
+      say "Marked done!"
+    else
+      if choice == "3"
+        let idx = parseInt(ask "Task number: ")
+        set todos = keep items in todos where function(t)
+          set idx = idx - 1
+          return idx != 0
+        end
+        write json of todos to file filename
+        say "Deleted!"
+      else
+        if choice == "4"
+          set running = false
+          say "Goodbye!"
+        end
+      end
     end
-    write json of todos to file filename
-    say "Deleted!"
-
-  else if choice == "4"
-    set running = false
-    say "Goodbye!"
   end
 end
 ```
@@ -1086,20 +1095,28 @@ while running
 
       if op == "+"
         say a + b
-      else if op == "-"
-        say a - b
-      else if op == "*"
-        say a * b
-      else if op == "/"
-        if b == 0
-          say "Error: division by zero"
-        else
-          say a / b
-        end
-      else if op == "%"
-        say a % b
       else
-        say "Unknown operator: " + op
+        if op == "-"
+          say a - b
+        else
+          if op == "*"
+            say a * b
+          else
+            if op == "/"
+              if b == 0
+                say "Error: division by zero"
+              else
+                say a / b
+              end
+            else
+              if op == "%"
+                say a % b
+              else
+                say "Unknown operator: " + op
+              end
+            end
+          end
+        end
       end
 
     catch err
@@ -1138,6 +1155,8 @@ and  or  not
 ; Conditionals
 if cond ... else ... end
 if cond then a else b        ; ternary
+; chain conditions by nesting if inside else:
+; if c1 ... else  if c2 ... else ... end  end
 
 ; Loops
 while cond ... end
