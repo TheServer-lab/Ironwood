@@ -22,7 +22,8 @@ Ironwood is designed to be easy to read and write. If you've ever used Scratch, 
 14. [Networking](#14-networking)
 15. [Running Shell Commands](#15-running-shell-commands)
 16. [Modules](#16-modules)
-17. [Projects](#17-projects)
+17. [GUI](#17-gui)
+18. [Projects](#18-projects)
 
 ---
 
@@ -191,20 +192,16 @@ let score = 75
 
 if score >= 90
   say "A grade"
+else if score >= 70
+  say "B grade"
+else if score >= 50
+  say "C grade"
 else
-  if score >= 70
-    say "B grade"
-  else
-    if score >= 50
-      say "C grade"
-    else
-      say "Fail"
-    end
-  end
+  say "Fail"
 end
 ```
 
-Every `if` block ends with `end`. To chain multiple conditions, nest `if` inside `else` — each one needs its own `end`.
+Every `if` block ends with `end`.
 
 ### Inline ternary (if-then-else expression)
 
@@ -937,7 +934,206 @@ Then import and test it from a main program.
 
 ---
 
-## 17. Projects
+## 17. GUI
+
+Ironwood can open a native desktop window using Dear ImGui. GUI support requires compiling with `-DIRONWOOD_GUI` — see `REQUIREMENTS.txt` for the full build instructions.
+
+### The gui block
+
+The `gui` block opens a window and runs its body **once per frame** until the window is closed or `close` is called.
+
+```
+gui "My App" 800 600
+  ; this runs every frame
+  label "Hello, world!"
+end
+```
+
+You can omit the title and size to use defaults (`"Ironwood"`, 800×600):
+
+```
+gui
+  label "Hello!"
+end
+```
+
+### Windows
+
+Use `window` to create a named panel inside the gui block. Every `window` needs an `end`.
+
+```
+gui "My App" 800 600
+  window "Main Panel"
+    label "I am inside a panel."
+  end
+end
+```
+
+You can optionally set an initial size:
+
+```
+window "Settings" 400 300
+  label "Settings go here"
+end
+```
+
+### label
+
+Displays text. Accepts any expression.
+
+```
+let score = 42
+label "Your score: " + score
+```
+
+### button
+
+`button` is an **expression** that returns `true` on the frame it is clicked. Use it directly in an `if`:
+
+```
+let clicks = 0
+
+gui "Clicker"
+  window "Game"
+    label "Clicks: " + clicks
+    if button "Click me!"
+      set clicks = clicks + 1
+    end
+  end
+end
+```
+
+### input
+
+`input` is an expression that returns the current text in the field. The value persists across frames.
+
+```
+gui "Greeter"
+  window "Hello"
+    let name = input "Your name"
+    label "Hello, " + name + "!"
+  end
+end
+```
+
+### checkbox
+
+`checkbox` is an expression that returns `true` or `false`. The value persists across frames.
+
+```
+let dark = checkbox "Dark mode"
+if dark
+  label "Dark mode is on"
+end
+```
+
+### slider
+
+`slider` is an expression that returns the current number. Use `from` and `to` to set the range.
+
+```
+let vol = slider "Volume" from 0 to 100
+label "Volume: " + parseInt(vol)
+```
+
+### separator, sameline, spacing
+
+Layout helpers — no `end` needed:
+
+```
+label "Section A"
+separator
+label "Left"
+sameline
+label "Right"
+spacing
+label "Below the gap"
+```
+
+### color
+
+`color r g b ... end` sets the text color for everything inside it. Values are 0–255.
+
+```
+color 255 80 80
+  label "This text is red"
+end
+color 80 255 80
+  label "This text is green"
+end
+```
+
+### close
+
+`close` shuts the window and exits the gui block, continuing the rest of the program.
+
+```
+if button "Quit"
+  close
+end
+```
+
+### Full example
+
+```
+let clicks   = 0
+let messages = []
+
+gui "My App" 600 500
+
+  window "Controls"
+    label "Clicks: " + clicks
+    separator
+
+    if button "Click!"
+      set clicks = clicks + 1
+      add "Clicked! Total: " + clicks to messages
+    end
+
+    sameline
+
+    if button "Reset"
+      set clicks = 0
+    end
+
+    spacing
+    let name  = input    "Your name"
+    let happy = checkbox "I am happy"
+    let vol   = slider   "Volume" from 0 to 100
+    separator
+
+    if button "Submit"
+      let mood = if happy then "happy" else "not so happy"
+      add name + " is " + mood to messages
+    end
+
+    spacing
+    for each msg in messages
+      color 100 220 100
+        label "> " + msg
+      end
+    end
+
+    separator
+    if button "Quit"
+      close
+    end
+  end
+
+end
+
+say "Window closed. Clicks: " + clicks
+```
+
+### ✏️ Exercise 17
+Build a GUI temperature converter:
+- A slider for a Celsius value from -50 to 150
+- A label showing the equivalent in Fahrenheit (`F = C * 9/5 + 32`)
+- A checkbox "Show Kelvin" that, when ticked, also shows the Kelvin value (`K = C + 273.15`)
+
+---
+
+## 18. Projects
 
 Now that you know everything, here are some complete projects to try.
 
@@ -959,12 +1155,10 @@ while not won
   if guess == secret
     set won = true
     say "Correct! You got it in " + attempts + " attempts!"
+  else if guess < secret
+    say "Too low!"
   else
-    if guess < secret
-      say "Too low!"
-    else
-      say "Too high!"
-    end
+    say "Too high!"
   end
 end
 ```
@@ -1006,28 +1200,25 @@ while running
     add {text: text, done: false} to todos
     write json of todos to file filename
     say "Added!"
-  else
-    if choice == "2"
-      let idx = parseInt(ask "Task number: ") - 1
-      set todos[idx].done = true
-      write json of todos to file filename
-      say "Marked done!"
-    else
-      if choice == "3"
-        let idx = parseInt(ask "Task number: ")
-        set todos = keep items in todos where function(t)
-          set idx = idx - 1
-          return idx != 0
-        end
-        write json of todos to file filename
-        say "Deleted!"
-      else
-        if choice == "4"
-          set running = false
-          say "Goodbye!"
-        end
-      end
+
+  else if choice == "2"
+    let idx = parseInt(ask "Task number: ") - 1
+    set todos[idx].done = true
+    write json of todos to file filename
+    say "Marked done!"
+
+  else if choice == "3"
+    let idx = parseInt(ask "Task number: ")
+    set todos = keep items in todos where function(t)
+      set idx = idx - 1
+      return idx != 0
     end
+    write json of todos to file filename
+    say "Deleted!"
+
+  else if choice == "4"
+    set running = false
+    say "Goodbye!"
   end
 end
 ```
@@ -1095,28 +1286,20 @@ while running
 
       if op == "+"
         say a + b
-      else
-        if op == "-"
-          say a - b
+      else if op == "-"
+        say a - b
+      else if op == "*"
+        say a * b
+      else if op == "/"
+        if b == 0
+          say "Error: division by zero"
         else
-          if op == "*"
-            say a * b
-          else
-            if op == "/"
-              if b == 0
-                say "Error: division by zero"
-              else
-                say a / b
-              end
-            else
-              if op == "%"
-                say a % b
-              else
-                say "Unknown operator: " + op
-              end
-            end
-          end
+          say a / b
         end
+      else if op == "%"
+        say a % b
+      else
+        say "Unknown operator: " + op
       end
 
     catch err
@@ -1155,8 +1338,6 @@ and  or  not
 ; Conditionals
 if cond ... else ... end
 if cond then a else b        ; ternary
-; chain conditions by nesting if inside else:
-; if c1 ... else  if c2 ... else ... end  end
 
 ; Loops
 while cond ... end
@@ -1225,7 +1406,95 @@ run "command"
 ; Modules
 get "stdlib" as std
 get "myfile.irw" as mod
+
+; GUI  (requires -DIRONWOOD_GUI, see REQUIREMENTS.txt)
+gui "Title" [w h] ... end      ; open window, body = one frame
+window "Panel" [w h] ... end   ; sub-panel
+label <expr>                   ; static text
+if button <expr>               ; true when clicked
+let x = input    <expr>        ; text field   → string
+let x = checkbox <expr>        ; tick box     → bool
+let x = slider <expr> from <n> to <n>  ; → number
+separator                      ; horizontal rule
+sameline                       ; next widget on same line
+spacing                        ; blank gap
+color <r> <g> <b> ... end      ; scoped text color (0-255)
+close                          ; exit gui block
 ```
+
+---
+
+### Project 5: GUI To-Do List
+
+```
+let filename = "todos.json"
+let todos    = []
+
+if file exists filename
+  set todos = parse json read file filename
+end
+
+gui "To-Do List" 500 500
+
+  window "Tasks"
+
+    ; Show all tasks
+    let i = 1
+    for each todo in todos
+      if todo.done
+        color 120 120 120
+          label "[x] " + i + ". " + todo.text
+        end
+      else
+        color 220 220 100
+          label "[ ] " + i + ". " + todo.text
+        end
+      end
+      set i = i + 1
+    end
+
+    separator
+
+    ; Add new task
+    let newTask = input "New task"
+    sameline
+    if button "Add"
+      if length of newTask > 0
+        add {text: newTask, done: false} to todos
+        write json of todos to file filename
+      end
+    end
+
+    separator
+
+    ; Complete / delete by number
+    let taskNum = input "Task number"
+    sameline
+    if button "Complete"
+      let idx = parseInt(taskNum) - 1
+      set todos[idx].done = true
+      write json of todos to file filename
+    end
+    sameline
+    if button "Delete"
+      let idx   = parseInt(taskNum)
+      set todos = keep items in todos where function(t)
+        set idx = idx - 1
+        return idx != 0
+      end
+      write json of todos to file filename
+    end
+
+    separator
+    if button "Quit"
+      close
+    end
+
+  end
+
+end
+```
+
 
 ---
 
