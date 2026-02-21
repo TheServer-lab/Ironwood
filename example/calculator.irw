@@ -1,0 +1,190 @@
+; ─────────────────────────────────────────
+;  calculator.irw — GUI Calculator
+; ─────────────────────────────────────────
+
+let display  = "0"
+let stored   = 0
+let operator = ""
+let fresh    = true
+
+; Button widths — all digit/op buttons same size
+let BW = 60
+let CW = 130
+
+function applyOp(a, op, b)
+  if op == "+"
+    return a + b
+  end
+  if op == "-"
+    return a - b
+  end
+  if op == "*"
+    return a * b
+  end
+  if op == "/"
+    if b == 0
+      return "Error"
+    end
+    return a / b
+  end
+  return b
+end
+
+function pressDigit(d)
+  if fresh
+    set display = d
+    set fresh = false
+  else
+    if display == "0"
+      set display = d
+    else
+      set display = display + d
+    end
+  end
+end
+
+function pressOp(op)
+  if operator != "" and not fresh
+    let result = applyOp(stored, operator, parseFloat(display))
+    set display = toString(result)
+  end
+  set stored   = parseFloat(display)
+  set operator = op
+  set fresh    = true
+end
+
+gui "Calculator" 300 420
+
+  window "Calculator" 300 420
+
+    ; ── Display ──────────────────────────────
+    spacing
+    spacing
+    color 255 220 80
+      label "  " + display
+    end
+    if operator != ""
+      color 150 150 150
+        label "  " + stored + "  " + operator
+      end
+    end
+    spacing
+    separator
+    spacing
+
+    ; ── Row 1: 7  8  9  / ────────────────────
+    if button "  7  " width BW
+      call pressDigit("7")
+    end
+    sameline
+    if button "  8  " width BW
+      call pressDigit("8")
+    end
+    sameline
+    if button "  9  " width BW
+      call pressDigit("9")
+    end
+    sameline
+    color 255 180 50
+      if button "  /  " width BW
+        call pressOp("/")
+      end
+    end
+
+    spacing
+
+    ; ── Row 2: 4  5  6  * ────────────────────
+    if button "  4  " width BW
+      call pressDigit("4")
+    end
+    sameline
+    if button "  5  " width BW
+      call pressDigit("5")
+    end
+    sameline
+    if button "  6  " width BW
+      call pressDigit("6")
+    end
+    sameline
+    color 255 180 50
+      if button "  *  " width BW
+        call pressOp("*")
+      end
+    end
+
+    spacing
+
+    ; ── Row 3: 1  2  3  - ────────────────────
+    if button "  1  " width BW
+      call pressDigit("1")
+    end
+    sameline
+    if button "  2  " width BW
+      call pressDigit("2")
+    end
+    sameline
+    if button "  3  " width BW
+      call pressDigit("3")
+    end
+    sameline
+    color 255 180 50
+      if button "  -  " width BW
+        call pressOp("-")
+      end
+    end
+
+    spacing
+
+    ; ── Row 4: 0  .  =  + ────────────────────
+    if button "  0  " width BW
+      call pressDigit("0")
+    end
+    sameline
+    if button "  .  " width BW
+      if index of "." in display == -1
+        set display = display + "."
+        set fresh = false
+      end
+    end
+    sameline
+    color 80 220 120
+      if button "  =  " width BW
+        if operator != ""
+          let result = applyOp(stored, operator, parseFloat(display))
+          set display  = toString(result)
+          set operator = ""
+          set stored   = 0
+          set fresh    = true
+        end
+      end
+    end
+    sameline
+    color 255 180 50
+      if button "  +  " width BW
+        call pressOp("+")
+      end
+    end
+
+    spacing
+    separator
+    spacing
+
+    ; ── Row 5: C  Quit ───────────────────────
+    color 220 80 80
+      if button "       C       " width CW
+        set display  = "0"
+        set stored   = 0
+        set operator = ""
+        set fresh    = true
+      end
+    end
+    sameline
+    if button "     Quit     " width CW
+      close
+    end
+
+    spacing
+
+  end
+
+end
