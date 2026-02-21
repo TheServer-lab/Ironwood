@@ -1,0 +1,95 @@
+════════════════════════════════════════════════════════════════
+ Ironwood v4.0 — Build Requirements
+════════════════════════════════════════════════════════════════
+
+────────────────────────────────────────────────────────────────
+ WITHOUT GUI  (just the language, no window)
+────────────────────────────────────────────────────────────────
+
+  • A C++17 compiler:
+      Windows  → MinGW-w64  https://www.mingw-w64.org/
+      Linux    → GCC        sudo apt install build-essential
+      macOS    → Clang      xcode-select --install
+
+  Compile:
+      Windows:  g++ -std=c++17 -O2 -o ironwood.exe ironwood_v2.cpp -lws2_32
+      Linux:    g++ -std=c++17 -O2 -o ironwood ironwood_v2.cpp
+      macOS:    g++ -std=c++17 -O2 -o ironwood ironwood_v2.cpp
+
+────────────────────────────────────────────────────────────────
+ WITH GUI  (-DIRONWOOD_GUI)
+────────────────────────────────────────────────────────────────
+
+  In addition to the compiler above, you need:
+
+  1. Dear ImGui (source, no build needed)
+       https://github.com/ocornut/imgui/releases
+       → Download the source .zip and extract to C:\imgui\  (or anywhere)
+       → Tested with v1.89+
+
+  2. GLFW 3 (pre-built binaries for Windows, or package for Linux/macOS)
+       https://www.glfw.org/download.html
+       → Windows: download "64-bit Windows binaries", extract to C:\libs\glfw\
+       → Linux:   sudo apt install libglfw3-dev
+       → macOS:   brew install glfw
+       → Tested with v3.4
+
+  3. OpenGL (already present on all platforms, nothing to download)
+
+  ── Windows (MinGW) compile command ─────────────────────────
+
+  g++ -std=c++17 -O2 -DIRONWOOD_GUI ^
+      -I C:\libs\glfw\include ^
+      -I C:\imgui -I C:\imgui\backends ^
+      ironwood_v2.cpp ^
+      C:\imgui\imgui.cpp C:\imgui\imgui_draw.cpp ^
+      C:\imgui\imgui_tables.cpp C:\imgui\imgui_widgets.cpp ^
+      C:\imgui\backends\imgui_impl_glfw.cpp ^
+      C:\imgui\backends\imgui_impl_opengl3.cpp ^
+      -L C:\libs\glfw\glfw-3.4.bin.WIN64\lib-mingw-w64 ^
+      -lglfw3 -lopengl32 -lgdi32 -lws2_32 ^
+      -o ironwood.exe
+
+  ── Linux compile command ────────────────────────────────────
+
+  g++ -std=c++17 -O2 -DIRONWOOD_GUI \
+      -I/path/to/imgui -I/path/to/imgui/backends \
+      ironwood_v2.cpp \
+      /path/to/imgui/imgui.cpp /path/to/imgui/imgui_draw.cpp \
+      /path/to/imgui/imgui_tables.cpp /path/to/imgui/imgui_widgets.cpp \
+      /path/to/imgui/backends/imgui_impl_glfw.cpp \
+      /path/to/imgui/backends/imgui_impl_opengl3.cpp \
+      -lglfw -lGL -ldl -lpthread \
+      -o ironwood
+
+  ── macOS compile command ────────────────────────────────────
+
+  g++ -std=c++17 -O2 -DIRONWOOD_GUI \
+      -I/path/to/imgui -I/path/to/imgui/backends \
+      ironwood_v2.cpp \
+      /path/to/imgui/imgui.cpp /path/to/imgui/imgui_draw.cpp \
+      /path/to/imgui/imgui_tables.cpp /path/to/imgui/imgui_widgets.cpp \
+      /path/to/imgui/backends/imgui_impl_glfw.cpp \
+      /path/to/imgui/backends/imgui_impl_opengl3.cpp \
+      -lglfw -framework OpenGL -framework Cocoa \
+      -framework IOKit -framework CoreVideo \
+      -o ironwood
+
+────────────────────────────────────────────────────────────────
+ NOTES
+────────────────────────────────────────────────────────────────
+
+  • The interpreter is a single file: ironwood_v2.cpp
+    No CMake, no Makefile, no build system required.
+
+  • GUI is opt-in. Without -DIRONWOOD_GUI the binary is fully
+    functional for all non-GUI programs. GUI keywords will parse
+    correctly but throw a helpful error at runtime if used.
+
+  • All .irw source files are plain text and can be opened in
+    any text editor.
+
+  • Ironwood is tested on:
+      Windows 11  + MinGW-w64 13.x
+      Ubuntu 24   + GCC 13.x
+      macOS 14    + Apple Clang 15.x
